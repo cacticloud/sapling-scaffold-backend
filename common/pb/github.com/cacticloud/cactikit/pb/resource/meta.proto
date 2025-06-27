@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package cacticloud.cactikit.resource;
+option go_package = "github.com/cacticloud/cactikit/pb/resource";
+
+message Meta  {
+    // 对象Id
+    // @gotags: json:"id" `xorm:"'id' pk autoincr"`
+    string id = 1;
+    // 创建人
+    // @gotags: json:"create_by" xorm:"create_by"
+    string create_by = 2;
+    // 创建时间
+    // @gotags: json:"create_at" xorm:"create_at"
+    int64 create_at = 3;
+    // 更新时间
+    // @gotags:  json:"update_at" xorm:"update_at"
+    int64 update_at = 4;
+    // 更新人
+    // @gotags: json:"update_by"  xorm:"update_by" 
+    string update_by = 5;
+}

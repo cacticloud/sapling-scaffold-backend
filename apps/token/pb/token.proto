@@ -1,0 +1,296 @@
+syntax = "proto3";
+
+package token;
+option go_package = "github.com/cacticloud/sapling-scaffold-backend/apps/token";
+
+import "apps/user/pb/user.proto";
+
+// 授权类型
+enum GRANT_TYPE {
+  // 用户密码授权
+  PASSWORD = 0;
+
+  // LDAP授权
+  LDAP = 1;
+
+  // 刷新授权
+  REFRESH = 2;
+
+  // 私有令牌, 用于编程使用
+  PRIVATE_TOKEN = 3;
+
+  // 客户端授权
+  CLIENT = 4;
+
+  // Oauth2.0 Auth Code授权
+  AUTH_CODE = 5;
+
+  // 隐式授权
+  IMPLICIT = 6;
+
+  // 微信授权
+  WECHAT_WORK = 7;
+
+  // 飞书授权
+  FEISHU = 8;
+
+  // 钉钉授权
+  DINGDING = 9;
+
+  // 转发给其他认证服务做认证
+  FORWARD_AUTH = 10;
+}
+
+// 令牌类型
+enum TOKEN_TYPE {
+  // Bearer Token
+  BEARER = 0;
+  // 基于Mac的Token
+  MAC = 1;
+  // Json Web Token
+  JWT = 2;
+}
+
+// 冻结类型
+enum BLOCK_TYPE {
+  // 刷新Token过期, 回话中断
+  REFRESH_TOKEN_EXPIRED = 0;
+  // 异地登陆
+  OTHER_PLACE_LOGGED_IN = 1;
+  // 异常Ip登陆
+  OTHER_IP_LOGGED_IN = 2;
+}
+
+enum PLATFORM {
+  // Web 登陆授权
+  WEB = 0;
+  // API 访问授权
+  API = 1;
+}
+
+message Token {
+  // 主键ID
+  // @gotags: json:"id" xorm:"'id' pk autoincr <-"
+  int64 id = 1;
+
+  // 颁发平台, 根据授权方式判断
+  // @gotags: json:"platform" xorm:"platform"
+  PLATFORM platform = 2;
+
+  // 访问令牌
+  // @gotags: json:"access_token" xorm:"access_token"
+  string access_token = 3;
+
+  // 刷新令牌, 当访问令牌过期时, 可以刷新令牌进行刷新
+  // @gotags: json:"refresh_token" xorm:"refresh_token"
+  string refresh_token = 4;
+
+  // 颁发时间
+  // @gotags: json:"issue_at" xorm:"issue_at"
+  int64 issue_at = 5;
+
+  // 访问令牌过期时间
+  // @gotags: json:"access_expired_at" xorm:"access_expired_at"
+  int64 access_expired_at = 6;
+
+  // 刷新令牌过期时间
+  // @gotags: json:"refresh_expired_at" xorm:"refresh_expired_at"
+  int64 refresh_expired_at = 7;
+
+  // 用户类型
+  // @gotags: json:"user_type" xorm:"user_type"
+  user.TYPE user_type = 8;
+
+  // 用户当前所处域
+  // @gotags: json:"domain" xorm:"domain"
+  string domain = 9;
+
+  // 用户名
+  // @gotags: json:"username" xorm:"username"
+  string username = 10;
+
+  // 用户Id
+  // @gotags: json:"user_id" xorm:"user_id"
+  string user_id = 11;
+
+  // 授权类型
+  // @gotags: json:"grant_type" xorm:"grant_type"
+  GRANT_TYPE grant_type = 12;
+
+  // 令牌类型
+  // @gotags: json:"token_type" xorm:"token_type"
+  TOKEN_TYPE type = 13;
+
+  // 当前空间
+  // @gotags: json:"namespace" xorm:"namespace"
+  string namespace = 14;
+
+  // 空间内的过来条件, 格式key=value
+  // @gotags: json:"scope,omitempty" xorm:"scope"
+  string scope = 15;
+
+  // 令牌描述信息, 当授权类型为Private Token时, 做描述使用
+  // @gotags: json:"description,omitempty" xorm:"description"
+  string description = 16;
+
+  // 可选名称空间
+  // @gotags:  json:"available_namespace,omitempty" xorm:"-"
+  repeated string available_namespace = 17;
+
+  // 令牌状态
+  // @gotags: json:"status,omitempty" xorm:"extends"
+  Status status = 18;
+
+  // 令牌办法给客户端信息
+  // @gotags: json:"location,omitempty" xorm:"extends"
+  Location location = 19;
+
+  // 其他信息
+  // @gotags: json:"meta,omitempty" xorm:"meta"
+  map<string,string> meta = 20;
+}
+
+message Status {
+  // 是否冻结
+  // @gotags: json:"is_block"  xorm:"is_block"
+  bool is_block = 1;
+
+  // 冻结类型
+  // @gotags: json:"block_type" xorm:"block_type"
+  BLOCK_TYPE block_type = 2;
+
+  // 冻结时间
+  // @gotags: json:"block_at" xorm:"block_at"
+  int64 block_at = 3;
+
+  // 冻结原因
+  // @gotags: json:"block_reason" xorm:"block_reason"
+  string block_reason = 4;
+}
+
+
+message Location {
+  // 令牌申请者IP地址
+  // @gotags: json:"ip_location" xorm:"extends"
+  IPLocation ip_location = 1;
+
+  // 令牌申请者UA
+  // @gotags: json:"user_agent" xorm:"extends"
+  UserAgent user_agent = 2;
+}
+
+// IPLocation 客户端地理位置信息
+message IPLocation {
+  // 令牌申请者IP地址
+  // @gotags: json:"remote_ip" xorm:"remote_ip"
+  string remote_ip = 1;
+
+  // 城市编号
+  // @gotags: json:"city_id" xorm:"city_id"
+  int64 city_id = 2;
+
+  // 国家
+  // @gotags: json:"country" xorm:"country"
+  string country = 3;
+
+  // 地区
+  // @gotags: json:"region" xorm:"region"
+  string region = 4;
+
+  // 省
+  // @gotags: json:"province" xorm:"province"
+  string province = 5;
+
+  // 城
+  // @gotags: json:"city" xorm:"city"
+  string city = 6;
+
+  // 服务商
+  // @gotags: json:"isp" xorm:"isp"
+  string isp = 7;
+}
+
+// UserAgent todo
+message UserAgent {
+  // 系统OS
+  // @gotags: json:"os" xorm:"os"
+  string os = 1;
+
+  // 客户端平台
+  // @gotags: json:"user_agent_platform" xorm:"user_agent_platform"
+  string user_agent_platform = 2;
+
+  // 内核名称
+  // @gotags: json:"engine_name" xorm:"engine_name"
+  string engine_name = 3;
+
+  // 内核版本
+  // @gotags: json:"engine_version" xorm:"engine_version"
+  string engine_version = 4;
+
+  // 浏览器名称
+  // @gotags: json:"browser_name" xorm:"browser_name"
+  string browser_name = 5;
+
+  // 浏览器版本
+  // @gotags: json:"browser_version" xorm:"browser_version"
+  string browser_version = 6;
+}
+
+message TokenSet {
+  // 总数量
+  // @gotags: json:"total"
+  int64 total = 1;
+
+  // 列表
+  // @gotags: json:"items"
+  repeated Token items = 2;
+}
+
+message IssueTokenRequest {
+  // 测试颁发
+  // @gotags: json:"dry_run"
+  bool dry_run = 15;
+  // 授权类型
+  // @gotags: json:"grant_type"
+  GRANT_TYPE grant_type = 1;
+  // 令牌类型
+  // @gotags: json:"type"
+  TOKEN_TYPE type = 2;
+  // 令牌过期时间
+  // @gotags: json:"expired_at"
+  int64 expired_at = 3;
+  // 令牌访问空间
+  // @gotags: json:"namespace"
+  string namespace = 4;
+  // 空间内的过滤条件, 格式key=value
+  // @gotags: json:"scope,omitempty"
+  string scope = 5;
+  // PASSWORD授权时, 用户名
+  // @gotags: json:"username,omitempty"
+  string username = 6;
+  // PASSWORD授权时, 用户密码
+  // @gotags: json:"password,omitempty"
+  string password = 7;
+  // REFRESH授权时, 刷新令牌
+  // @gotags: json:"refresh_token,omitempty"
+  string refresh_token = 8;
+  // PRIVATE_TOKEN授权时, 访问令牌
+  // @gotags: json:"access_token,omitempty"
+  string access_token = 9;
+  // PRIVATE_TOKEN授权时, 描述信息
+  // @gotags: json:"description"
+  string description = 10;
+  // AUTH_CODE授权时, Code
+  // @gotags: json:"auth_code"
+  string auth_code = 11;
+  // AUTH_CODE授权时, State
+  // @gotags: json:"state"
+  string state = 12;
+  // 二次认证时验证码
+  // @gotags: json:"verify_code"
+  string verify_code = 13;
+  // 令牌办法给客户端信息
+  // @gotags: json:"location,omitempty"
+  Location location = 14;
+}

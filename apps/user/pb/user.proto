@@ -1,0 +1,214 @@
+syntax = "proto3";
+
+package user;
+option go_package = "github.com/cacticloud/sapling-scaffold-backend/apps/user";
+
+
+enum PROVIDER {
+  // 本地数据库
+  LOCAL = 0;
+
+  // 来源LDAP
+  LDAP = 1;
+  
+  // 来源飞书
+  FEISHU = 2;
+}
+
+// 为了防止越权, 用户可以调整的权限范围只有10已下的权限
+enum TYPE {
+  // 子账号, 无用户中心后台管理权限
+  SUB = 0;
+
+  // 主账号, 具有本域的所有权限
+  PRIMARY = 10;
+
+  // 超级管理员, 系统管理员, 万能的人, 不受权限系统约束
+  SUPPER = 15;
+}
+
+// User 用户账号
+message User {
+  // 定义信息
+  // @gotags: json:"spec" xorm:"extends"
+  CreateUserRequest spec = 2;
+}
+
+enum Gender {
+  // 保密
+  UNKNOWN = 0;
+  // 男
+  MALE = 1;
+  // 女
+  FEMALE = 2;
+}
+
+enum Status {
+  // 激活
+  ACTIVE = 0;
+
+  // 锁定
+  LOCK = 1;
+  
+  // 离职
+  RESIGN = 2;
+}
+
+message CreateUserRequest {
+  // // 元信息
+  // // @gotags: json:"meta" `xorm:"extends"`
+  // cacticloud.cactikit.resource.Meta meta = 1;
+  // 唯一ID
+  // @gotags: json:"id" xorm:"'id' pk autoincr <-"
+  int64 id = 1;
+
+  // 录入时间
+  // @gotags: json:"create_at" xorm:"create_at"
+  int64 create_at = 2;
+
+  // 更新时间
+  // @gotags: json:"update_at" xorm:"update_at"
+  int64 update_at = 3;
+
+  // 更新人
+  // @gotags: json:"update_by" xorm:"update_by"
+  string update_by = 4;
+
+  // domain 创建人
+  // @gotags: json:"create_by" xorm:"create_by"
+  string create_by = 5;
+
+  // 账号提供方
+  // @gotags: json:"provider" xorm:"provider"
+  PROVIDER provider = 6;
+
+  // 用户类型
+  // @gotags: json:"type" xorm:"type"
+  TYPE type = 7;
+
+  // 域信息
+  // @gotags: json:"domain" xorm:"domain"
+  string domain = 8;
+
+  // 用户账号登录名
+  // @gotags: json:"username" xorm:"username" validate:"required,lte=60"
+  string username = 9;
+
+  // 密码相关信息
+  // @gotags: json:"password" xorm:"password" validate:"required,lte=80"
+  string password = 10;
+
+  // 用户描述
+  // @gotags: json:"remark" xorm:"remark"
+  string remark = 11;
+
+  // 状态
+  // @gotags: json:"status" xorm:"status" validate:"lte=10"
+  Status status = 12;
+
+  // Profile信息
+  // @gotags: json:"profile"  xorm:"extends"
+  Profile profile = 13;
+
+  // 用户飞书相关信息
+  // @gotags: json:"feishu" xorm:"extends"
+  Feishu feishu = 23;
+}
+
+message  UpdateUserRequest {
+  // role id
+  // @gotags: json:"role_ids,omitempty"
+  repeated int64 role_ids = 1;
+
+  // 定义信息
+  // @gotags: json:"spec"
+  CreateUserRequest spec = 2;
+}
+
+// 用户和角色
+message UserRole {
+  // ID
+  // @gotags: json:"id" xorm:"'id' pk autoincr <-"
+  int64 id = 1;
+
+  // 用户id
+  // @gotags: json:"user_id" xorm:"user_id"
+  int64 user_id = 2;
+
+  // 角色id
+  // @gotags: json:"role_id" xorm:"role_id"
+  int64 role_id = 3;
+}
+
+message Profile {
+  // 头像
+  // @gotags: json:"avatar" xorm:"avatar"
+  string avatar = 14;
+
+  // 用户昵称, 用于在界面进行展示
+  // @gotags: json:"nick_name" xorm:"nick_name"
+  string nick_name = 15;
+
+  // 用户真实姓名
+  // @gotags: json:"real_name" xorm:"real_name"
+  string real_name = 16;
+
+  // 性别
+  // @gotags: json:"gender" xorm:"gender"
+  Gender gender = 17;
+
+  // 手机号码, 用户可以通过手机进行注册和密码找回, 还可以通过手机号进行登录
+  // @gotags: json:"phone" xorm:"phone" 
+  string phone = 18;
+
+  // 邮箱, 用户可以通过邮箱进行注册和照明密码
+  // @gotags: json:"email" xorm:"email"
+  string email = 19;
+
+  // 用户住址
+  // @gotags: json:"address" xorm:"address"
+  string address = 20;
+
+  // 用户所在地
+  // @gotags: json:"city" xorm:"city"
+  string city = 21;
+
+  // 用户使用的语言
+  // @gotags: json:"language" xorm:"language"
+  string language = 22;
+}
+
+message Feishu {
+  // 用户在飞书应用内的唯一标识
+  // @gotags: json:"open_id" xorm:"open_id"
+  int64 open_id = 24;
+
+  // 用户统一ID，在同一租户开发的所有应用内的唯一标识
+  // @gotags: json:"union_id" xorm:"union_id"
+  int64 union_id = 25;
+
+  // 用户 user id，申请了邮箱获取权限(获取用户 user ID)的应用会返回该字段
+  // @gotags: json:"user_id" xorm:"user_id"
+  int64 user_id = 26;
+}
+
+message UserSet {
+  // 总数量
+  // @gotags: json:"total"
+  int64 total = 1;
+
+  // 数据项
+  // @gotags: json:"items"
+  repeated User items = 2;
+}
+
+enum DESCRIBE_BY {
+  // 通过UserId查询用户
+  USER_ID = 0;
+
+  // 通过Username查询用户
+  USER_NAME = 1;
+
+  // 通过飞书UserId查询用户
+  FEISHU_USER_ID = 2;
+}
