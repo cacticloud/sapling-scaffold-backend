@@ -8,7 +8,6 @@ import (
 
 	"github.com/cacticloud/cactikit/exception"
 	"github.com/cacticloud/cactikit/http/request"
-	"github.com/cacticloud/sapling-scaffold-backend/apps/domain"
 	"github.com/cacticloud/sapling-scaffold-backend/common/format"
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
@@ -40,19 +39,15 @@ func New(req *UpdateUserRequest) (*UpdateUserRequest, error) {
 
 func NewCreateUserRequest() *CreateUserRequest {
 	return &CreateUserRequest{
-		Feishu:  &Feishu{},
 		Profile: &Profile{},
 	}
 }
 
 func NewCreateUserRoleRequest() *UpdateUserRequest {
+
 	return &UpdateUserRequest{
 		Spec: NewCreateUserRequest(),
 	}
-}
-
-func NewFeishu() *Feishu {
-	return &Feishu{}
 }
 
 // NewHashedPassword 生产hash后的密码对象
@@ -93,13 +88,6 @@ func (req *UpdateUserRequest) Validate() error {
 	return validate.Struct(req)
 }
 
-func (req *CreateUserRequest) GetFeishuUserId() int64 {
-	if req.Feishu == nil {
-		return 0
-	}
-	return req.Feishu.UserId
-}
-
 func NewQueryUserRequestFromHTTP(r *http.Request) *QueryUserRequest {
 	query := NewQueryUserRequest()
 
@@ -126,13 +114,6 @@ func NewQueryUserRequest() *QueryUserRequest {
 func NewDescriptUserRequestById(id string) *DescribeUserRequest {
 	return &DescribeUserRequest{
 		DescribeBy: DESCRIBE_BY_USER_ID,
-		Id:         id,
-	}
-}
-
-func NewDescriptUserRequestByFeishuUserId(id string) *DescribeUserRequest {
-	return &DescribeUserRequest{
-		DescribeBy: DESCRIBE_BY_FEISHU_USER_ID,
 		Id:         id,
 	}
 }
@@ -207,7 +188,6 @@ func (s *UserSet) UserIds() (uids []int64) {
 func NewDefaultUser() *User {
 	return &User{
 		Spec: &CreateUserRequest{
-			Feishu:  &Feishu{},
 			Profile: &Profile{},
 		},
 	}
@@ -241,24 +221,17 @@ func (i *DescribeUserResponse) Update(req *UpdateUserRequest) {
 	i.User.Spec.UpdateAt = time.Now().Unix()
 }
 
-// SetupDefault 初始化一些空值, 兼容之前的数据
-func (i *User) SetupDefault() {
-	if i.Spec.Feishu == nil {
-		i.Spec.Feishu = NewFeishu()
-	}
-}
-
 func SpliteUserAndDomain(username string) (string, string) {
 	kvs := strings.Split(username, "@")
 	if len(kvs) > 1 {
 		dom := strings.Join(kvs[1:], "")
 		if dom == "" {
-			dom = domain.DEFAULT_DOMAIN
+			dom = "default"
 		}
 		return kvs[0], dom
 	}
 
-	return username, domain.DEFAULT_DOMAIN
+	return username, "default"
 }
 
 func NewGetUserRoleRequest(id string) *GetUserRoleRequest {

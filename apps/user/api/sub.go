@@ -5,13 +5,13 @@ import (
 	"time"
 
 	"github.com/cacticloud/cactikit/app"
+	"github.com/cacticloud/cactikit/exception"
 	"github.com/cacticloud/cactikit/http/label"
 	"github.com/cacticloud/cactikit/http/response"
 	"github.com/cacticloud/cactikit/logger"
 	"github.com/cacticloud/cactikit/logger/zap"
 	"github.com/cacticloud/sapling-scaffold-backend/apps/token"
 	"github.com/cacticloud/sapling-scaffold-backend/apps/user"
-	"github.com/cacticloud/sapling-scaffold-backend/utils"
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 )
@@ -47,7 +47,7 @@ func (h *primary) Registry(ws *restful.WebService) {
 		Doc("创建子账号").
 		Metadata(label.Perms, "sys:user:create").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Reads(user.CreateUserRequest{}).
+		Reads(user.UpdateUserRequest{}).
 		Returns(200, "创建成功", &user.User{}))
 
 	ws.Route(ws.GET("/").To(h.QueryUser).
@@ -108,6 +108,7 @@ func (h *primary) Registry(ws *restful.WebService) {
 }
 
 func (h *primary) CreateUser(r *restful.Request, w *restful.Response) {
+
 	req := user.NewCreateUserRoleRequest()
 
 	if err := r.ReadEntity(req); err != nil {
@@ -115,9 +116,14 @@ func (h *primary) CreateUser(r *restful.Request, w *restful.Response) {
 		return
 	}
 
-	tk := token.GetTokenFromRequest(r)
-	req.Spec.Domain = tk.Domain
-	req.Spec.CreateBy = tk.Username
+	// tk := token.GetTokenFromRequest(r)
+	// if tk == nil {
+	// 	response.Failed(w, exception.NewUnauthorized("missing token"))
+	// 	return
+	// }
+
+	// req.Spec.Domain = tk.Domain
+	// req.Spec.CreateBy = tk.Username
 	req.Spec.CreateAt = time.Now().Unix()
 	set, err := h.service.CreateUser(r.Request.Context(), req)
 	if err != nil {
@@ -134,7 +140,14 @@ func (h *primary) PutUser(r *restful.Request, w *restful.Response) {
 		return
 	}
 	tk := token.GetTokenFromRequest(r)
-	putId, _ := utils.StringToInt64(r.PathParameter("id"))
+	// putId, _ := utils.StringToInt64(r.PathParameter("id"))
+	idStr := r.PathParameter("id")
+	putId, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		response.Failed(w, exception.NewBadRequest("无效的 user id: %s", idStr))
+		return
+	}
+
 	req.Spec.Id = putId
 	req.Spec.UpdateBy = tk.Username
 	req.Spec.Domain = tk.Domain
@@ -187,14 +200,26 @@ func (h *primary) QueryUser(r *restful.Request, w *restful.Response) {
 	response.Success(w, ins)
 }
 func (h *primary) DescribeUser(r *restful.Request, w *restful.Response) {
-	req := user.NewDescriptUserRequestById(r.PathParameter("id"))
-	ins, err := h.service.DescribeUser(r.Request.Context(), req)
+	const fn = "primary.DescribeUser"
+
+	// 1. 解析 id
+	idStr := r.PathParameter("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		response.Failed(w, exception.NewBadRequest("无效的 user id: %s", idStr))
+		return
+	}
+
+	// 2. 构造请求，直接用 int64
+	req := user.NewDescriptUserRequestById(strconv.FormatInt(id, 10))
+
+	// 3. 调用 service
+	resp, err := h.service.DescribeUser(r.Request.Context(), req)
 	if err != nil {
 		response.Failed(w, err)
 		return
 	}
-
-	response.Success(w, ins)
+	response.Success(w, resp)
 }
 
 func init() {

@@ -3,92 +3,59 @@ package start
 import (
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
-	"github.com/cacticloud/cactikit/app"
-	"github.com/cacticloud/cactikit/logger"
 	"github.com/cacticloud/cactikit/logger/zap"
-	// 注册所有服务
-	_ "github.com/cacticloud/sapling-scaffold-backend/apps"
-	"github.com/cacticloud/sapling-scaffold-backend/conf"
 	"github.com/cacticloud/sapling-scaffold-backend/protocol"
 	"github.com/spf13/cobra"
 )
 
-var (
-	confType string
-	confFile string
-)
+const sigBufSize = 1
 
-// startCmd represents the start command
+// Cmd 启动 API 服务并优雅停机
 var Cmd = &cobra.Command{
 	Use:   "start",
-	Short: "mcenter API服务",
-	Long:  "mcenter API服务",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		conf := conf.C()
-		// 启动服务
-		ch := make(chan os.Signal, 1)
-		defer close(ch)
-		signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP, syscall.SIGQUIT)
-
-		// 初始化服务
-		svr, err := newService(conf)
-		if err != nil {
-			return err
-		}
-
-		// 等待信号处理
-		go svr.waitSign(ch)
-
-		// 启动服务
-		if err := svr.start(); err != nil {
-			if !strings.Contains(err.Error(), "http: Server closed") {
-				return err
-			}
-		}
-
-		return nil
-	},
+	Short: "启动 API 服务",
+	RunE:  runE,
 }
 
-func newService(cnf *conf.Config) (*service, error) {
-	http := protocol.NewHTTPService()
-	// grpc := protocol.NewGRPCService()
-	svr := &service{
-		http: http,
-		// grpc: grpc,
-		log: zap.L().Named("CLI"),
-	}
-
-	return svr, nil
+func init() {
+	Cmd.PersistentFlags().StringP("dummy", "d", "", "占位参数")
 }
 
-type service struct {
-	http *protocol.HTTPService
+func runE(cmd *cobra.Command, args []string) error {
+	const fn, lp = "start.RunE", "start.RunE ---> "
+	log := zap.L().Named("CLI")
 
-	log logger.Logger
+	// 捕获系统信号
+	sigCh := make(chan os.Signal, sigBufSize)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
+	// 构建并启动 HTTPService
+	svc := &service{http: protocol.NewHTTPService()}
+	log.Infof("%s 服务实例已创建", lp)
+
+	go svc.waitSignal(sigCh)
+	return svc.start()
 }
+
+type service struct{ http *protocol.HTTPService }
 
 func (s *service) start() error {
-	s.log.Infof("loaded http app: %s", app.LoadedRESTfulApp())
-	s.log.Infof("loaded internal app: %s", app.LoadedInternalApp())
+	const fn, lp = "service.start", "service.start ---> "
+	log := zap.L().Named("CLI")
+
+	log.Infof("%s 正在启动 HTTP 服务", lp)
 	return s.http.Start()
 }
 
-func (s *service) waitSign(sign chan os.Signal) {
-	for sg := range sign {
-		switch v := sg.(type) {
-		default:
-			s.log.Infof("receive signal '%v', start graceful shutdown", v.String())
+func (s *service) waitSignal(ch chan os.Signal) {
+	const fn, lp = "service.waitSignal", "service.waitSignal ---> "
+	log := zap.L().Named("CLI")
 
-			if err := s.http.Stop(); err != nil {
-				s.log.Errorf("http graceful shutdown err: %s, force exit", err)
-			} else {
-				s.log.Infof("http service stop complete")
-			}
-			return
-		}
+	sig := <-ch
+	log.Infof("%s 收到停止信号：%v，即将优雅关闭", lp, sig)
+	if err := s.http.Stop(); err != nil {
+		log.Errorf("%s 优雅关闭失败：%v", lp, err)
 	}
 }

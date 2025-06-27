@@ -14,7 +14,7 @@ const (
 
 	// token也可以放到Cookie中, 只是cookie本身并不是太安全, 如果Authorization头没有才考虑从
 	// cookie中获取
-	ACCESS_TOKEN_COOKIE_KEY = "mcenter.access_token"
+	ACCESS_TOKEN_COOKIE_KEY = "sapling_scaffold_backend.access_token"
 )
 
 const (

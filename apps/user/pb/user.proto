@@ -109,10 +109,6 @@ message CreateUserRequest {
   // Profile信息
   // @gotags: json:"profile"  xorm:"extends"
   Profile profile = 13;
-
-  // 用户飞书相关信息
-  // @gotags: json:"feishu" xorm:"extends"
-  Feishu feishu = 23;
 }
 
 message  UpdateUserRequest {
@@ -178,19 +174,6 @@ message Profile {
   string language = 22;
 }
 
-message Feishu {
-  // 用户在飞书应用内的唯一标识
-  // @gotags: json:"open_id" xorm:"open_id"
-  int64 open_id = 24;
-
-  // 用户统一ID，在同一租户开发的所有应用内的唯一标识
-  // @gotags: json:"union_id" xorm:"union_id"
-  int64 union_id = 25;
-
-  // 用户 user id，申请了邮箱获取权限(获取用户 user ID)的应用会返回该字段
-  // @gotags: json:"user_id" xorm:"user_id"
-  int64 user_id = 26;
-}
 
 message UserSet {
   // 总数量

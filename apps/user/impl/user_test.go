@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cacticloud/sapling-scaffold-backend/apps/domain"
 	"github.com/cacticloud/sapling-scaffold-backend/apps/user"
 )
 
@@ -24,7 +23,7 @@ import (
 func TestCreateSupperUser(t *testing.T) {
 	// 1. 先构造一个 CreateUserRequest
 	createReq := user.NewCreateUserRequest()
-	createReq.Domain = domain.DEFAULT_DOMAIN
+	createReq.Domain = "default"
 	createReq.Username = "root"
 	createReq.Password = "123456"
 	createReq.Type = user.TYPE_SUPPER

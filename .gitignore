@@ -15,11 +15,11 @@ cover.out
 coverage.txt
 
 .DS_Store
-etc/mcenter.toml
-etc/mcenter.env
+etc/sapling_scaffold_backend.toml
+etc/sapling_scaffold_backend.env
 etc/unit_test.env
 etc/ssl
-mcenter
+sapling_scaffold_backend
 dist/
-mcenter-api
+sapling_scaffold_backend-api
 vendor/

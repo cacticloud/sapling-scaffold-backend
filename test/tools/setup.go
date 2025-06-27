@@ -17,7 +17,7 @@ func DevelopmentSetup() {
 	zap.DevelopmentSetup()
 
 	// 初始化配置, 提前配置好/etc/unit_test.env
-	err := conf.LoadConfigFromToml("/Users/wunai/Study/Go/src/gitlab.myinterest.top/internal-project/sapling-scaffold/sapling-scaffold-backend/etc/config.toml")
+	err := conf.LoadConfigFromToml("/Users/wunai/Study/Go/src/github.com/cacticloud/sapling-scaffold-backend/etc/config.toml")
 	if err != nil {
 		panic(err)
 	}
@@ -34,5 +34,5 @@ func DevelopmentSetup() {
 }
 
 func AccessToken() string {
-	return os.Getenv("MCENTER_ACCESS_TOKEN")
+	return os.Getenv("Sapling_Scaffold_ACCESS_TOKEN")
 }

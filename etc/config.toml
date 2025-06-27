@@ -1,6 +1,6 @@
 [app]
-name = "mcenter"
-key = "this is your app key"
+name = "sapling_scaffold"
+key = "sapling_scaffold"
 
 [app.http]
 host = "0.0.0.0"
@@ -15,13 +15,13 @@ host = "127.0.0.1"
 port = "3306"
 username = "root"
 password = "123456"
-database = "cacticloud"
+database = "sapling_scaffold"
 config = ""                                              #杂项配置
 max_idle_conn = 2                                         #连接池的空闲数大小
 max_open_conn = 0                                         #最大打开连接数 0为无限制
 
 # xorm 配置
-level = "warn"      #日志等级 debug || info || warn || error
+level = "debug"      #日志等级 debug || info || warn || error
 out_type = "console" #输出位置 console || file (console:输出到控制台 file:输出到日志文件)
 show_sql = true      #在日志记录器上显示SQL语句(debug级别大于info时生效)
 director = "log/db" #日志输出目录
@@ -34,13 +34,13 @@ compress = false    #是否压缩
 level = "debug"
 path = "logs"
 format = "text"
+console_format = "color"  # color | console | json
 to = "stdout"
 
 # zap log
 zap_level = "info"             #日志等级 debug || info || warn || error || dpanic || panic || fatal
 showLine = true            #是否显示行
 outType = "all"            #输出位置 console || file || all (console:输出到控制台 file:输出到日志文件 all:我全都要.jpg)
-console_format = "console" #输出到控制台时的输出格式 json || console
 file_format = "json"       #输出到文件时的输出格式 json || console
 director = "log/runtime"   #日志输出目录
 maxSize = 1                #切割大小(单位:mb)

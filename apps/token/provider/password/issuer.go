@@ -2,7 +2,6 @@ package password
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/cacticloud/cactikit/app"
@@ -23,14 +22,11 @@ var (
 
 type issuer struct {
 	user user.Service
-	// domain domain.Service
-
-	log logger.Logger
+	log  logger.Logger
 }
 
 func (i *issuer) Init() error {
 	i.user = app.GetInternalApp(user.AppName).(user.Service)
-	// i.domain = app.GetInternalApp(domain.AppName).(domain.Service)
 	i.log = zap.L().Named("issuer.password")
 	return nil
 }
@@ -46,7 +42,6 @@ func (i *issuer) validate(ctx context.Context, username, pass string) (*user.Use
 
 	// 检测用户的密码是否正确
 	u, err := i.user.DescribeUser(ctx, user.NewDescriptUserRequestByName(username))
-	fmt.Println(u, "------_>", user.NewDescriptUserRequestByName(username))
 	if err != nil {
 		return nil, AUTH_FAILED
 	}
