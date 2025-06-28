@@ -10,6 +10,7 @@ import (
 	"github.com/cacticloud/cactikit/cache/memory"
 	"github.com/cacticloud/cactikit/cache/redis"
 	"github.com/cacticloud/cactikit/logger/zap"
+	_ "github.com/cacticloud/sapling-scaffold-backend/apps"
 	"github.com/cacticloud/sapling-scaffold-backend/conf"
 	"github.com/spf13/cobra"
 )

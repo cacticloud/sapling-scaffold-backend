@@ -19,11 +19,12 @@ database = "sapling_scaffold"
 config = ""                                              #杂项配置
 max_idle_conn = 2                                         #连接池的空闲数大小
 max_open_conn = 0                                         #最大打开连接数 0为无限制
+schema_dir = "docs/schema/sapling_scaffold.sql"
 
 # xorm 配置
 level = "debug"      #日志等级 debug || info || warn || error
 out_type = "console" #输出位置 console || file (console:输出到控制台 file:输出到日志文件)
-show_sql = true      #在日志记录器上显示SQL语句(debug级别大于info时生效)
+show_sql = false      #在日志记录器上显示SQL语句(debug级别大于info时生效)
 director = "log/db" #日志输出目录
 maxSize = 1         #切割大小(单位:mb)
 max_backups = 10     #保留旧日志文件的最大数目(个)

@@ -62,6 +62,7 @@ func (s *service) IssueTokenNow(ctx context.Context, req *token.IssueTokenReques
 	}
 
 	// 颁发 token
+	s.log.Info(req, "---> IssueTokenNow")
 	tk, err := issuer.IssueToken(ctx, req)
 	if err != nil {
 		s.log.Errorf("%s颁发流程出错: %v", lp, err)
